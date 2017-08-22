@@ -79,6 +79,7 @@ exec >> /var/log/ipa-server-configure-first.log 2>&1
 echo "$(date) $0 $@"
 
 function upgrade_server () {
+	echo "ipa-server-configure-first:  upgrade_server" >&2
 	systemctl stop dirsrv.target
 	/usr/sbin/setup-ds.pl -u -s General.UpdateMode=offline
 	DIR=/var/libexec/ipa/ipa-upgrade-rpm-scriptlets.$$
@@ -113,6 +114,8 @@ function upgrade_server () {
 }
 
 if [ "$1" == upgrade ] ; then
+	echo "ipa-server-configure-first:  upgrade" >&2
+
 	if ! diff /data/volume-version /etc/volume-version ; then
 		echo "The /data volume was created using incompatible image." >&2
 		exit 2
@@ -155,6 +158,7 @@ if [ -f /etc/ipa/ca.crt ] ; then
 	echo "The FreeIPA server was already configured." >&2
 	exit 11
 else
+	echo "FreeIPA server not yet configured" >&2
 	COMMAND=ipa-server-install
 	RUN_CMD="/usr/sbin/ipa-server-install"
 	CLIENT_ONLY=false
@@ -181,6 +185,9 @@ else
 		CLIENT_ONLY=true
 
 	fi
+	echo "COMMAND=${COMMAND}" >&2
+	echo "RUN_CMD=${RUN_CMD}" >&2
+	echo "CLIENT_ONLY=${CLIENT_ONLY}" >&2
 
 	(
 		cd /data
@@ -202,6 +209,8 @@ else
 	if [ "$HOSTNAME_SHORT.$DOMAIN" != "$HOSTNAME" ] ; then
 		usage "The container has to have fully-qualified hostname defined."
 	fi
+	echo "HOSTNAME_SHORT=${HOSTNAME_SHORT}" >&2
+	echo "DOMAIN=${DOMAIN}" >&2
 
 	# Workaround 1409786
 	if ! $CLIENT_ONLY && \
@@ -214,6 +223,7 @@ else
 
 	if $CLIENT_ONLY; then
 		if [ -n "$IPA_PORT_53_UDP_ADDR" ] ; then
+			echo "Setting nameserver to ${IPA_PORT_53_UDP_ADDR}" >&2
 			echo "nameserver $IPA_PORT_53_UDP_ADDR" > /etc/resolv.conf
 		fi
 	fi
@@ -232,6 +242,8 @@ else
 		fi
 		cat /run/ipa/$COMMAND-options
 		) $RUN_CMD < $STDIN > $STDOUT 2> $STDERR ; then
+		echo "ipa-server-configure-first:  ${COMMAND} ran successfully"
+
 		sed -i 's/default_ccache_name/# default_ccache_name/' /data/etc/krb5.conf
 		cat /etc/volume-data-mv-list | while read i ; do
 			rm -rf /data$i
@@ -250,6 +262,7 @@ else
 		fi
 
 		if systemctl is-active -q named-pkcs11 || [ -f /run/ipa/ipa-server-ip ] ; then
+			echo "Updating server IP" >&2
 			cp -f /etc/resolv.conf /data/etc/resolv.conf.ipa
 			while ! host -t A $HOSTNAME > /dev/null ; do
 				sleep 1
@@ -259,9 +272,11 @@ else
 			echo "FreeIPA server does not run DNS server, skipping update-self-ip-address."
 		fi
 		if ! $CLIENT_ONLY; then
+		    echo "Updating IPA server systemd units"
 		    systemctl enable ipa-server-update-self-ip-address.service
 		    systemctl enable ipa-server-upgrade.service
 		else
+		    echo "Updating IPA client systemd units"
 		    systemctl disable ipa.service
 		    systemctl enable certmonger.service
 		fi
