@@ -159,7 +159,8 @@ else
 	RUN_CMD="/usr/sbin/ipa-server-install"
 	CLIENT_ONLY=false
 	if [ -f /run/ipa/ipa-replica-install-options ] ; then
-		if [ -f /data/ipa-server-install-options ] ; then
+		if [ -f /data/ipa-server-install-options
+		     -o -f /data/ipa-client-install-options ] ; then
 			usage "Too many install options files."
 		fi
 		if [ $(ls /data/ | grep  \\.gpg$ | wc -l) -gt 1 ] ; then
