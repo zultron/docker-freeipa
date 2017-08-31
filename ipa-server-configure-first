@@ -279,7 +279,8 @@ else
 		    systemctl enable ipa-server-upgrade.service
 		else
 		    echo "Updating IPA client systemd units"
-		    systemctl disable ipa.service
+		    systemctl disable ipa.service || \
+			rm -f /etc/systemd/system/multi-user.target.wants/ipa.service
 		    systemctl enable certmonger.service
 		fi
 		systemctl disable ipa-server-configure-first.service || rm -f /etc/systemd/system/multi-user.target.wants/ipa-server-configure-first.service
