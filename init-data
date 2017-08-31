@@ -19,6 +19,10 @@
 
 set -e
 
+# Turn on tracing of this script
+test -z "$DEBUG_INIT_DATA" || set -x
+
+
 cd /
 
 case "$1" in
@@ -47,6 +51,17 @@ if [ "$1" == 'exit-on-finished' ] ; then
 	shift
 else
 	touch /run/ipa/exit-on-error
+fi
+
+# Enable some debugging
+# - Turn on tracing of ipa-server-configure-first script
+test -z "$DEBUG_CONFIGURE_FIRST" || touch /run/ipa/debug-configure-first
+# - Don't power off if IPA install/upgrade fail
+if [ -n "$DEBUG_NO_POWEROFF" ]; then
+    echo "DEBUG_NO_POWEROFF set; disabling poweroff after configuration failure"
+    for i in ipa-server-configure-first.service ipa-server-upgrade.service; do
+	sed -i /usr/lib/systemd/system/$i -e '/FailureAction/ s/poweroff/none/'
+    done
 fi
 
 DATA=/data

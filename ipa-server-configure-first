@@ -22,7 +22,9 @@ mark_exit_code () {
 mkdir -p /run/ipa
 trap mark_exit_code ERR EXIT
 
-set -ex
+set -e
+
+test ! -f /run/ipa/debug-configure-first || set -x
 
 HOSTNAME=$( cat /data/hostname )
 
