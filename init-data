@@ -19,6 +19,9 @@
 
 set -e
 
+# Turn on tracing of this script
+test -z "$DEBUG_TRACE" || set -x
+
 cd /
 
 case "$1" in
@@ -47,6 +50,17 @@ if [ "$1" == 'exit-on-finished' ] ; then
 	shift
 else
 	touch /run/ipa/exit-on-error
+fi
+
+# Debugging:  Turn on tracing of ipa-server-configure-first script
+test -z "$DEBUG_TRACE" || touch /run/ipa/debug-trace
+
+# Debugging:  Don't power off if IPA install/upgrade fail
+if [ -n "$DEBUG_NO_EXIT" ]; then
+    echo "DEBUG_NO_EXIT set; disabling container exit after failure"
+    for i in ipa-server-configure-first.service ipa-server-upgrade.service; do
+	sed -i /usr/lib/systemd/system/$i -e '/FailureAction/ s/poweroff/none/'
+    done
 fi
 
 DATA=/data
