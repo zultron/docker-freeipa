@@ -3,6 +3,11 @@ FROM registry.fedoraproject.org/fedora:26
 
 MAINTAINER FreeIPA Developers <freeipa-devel@lists.fedorahosted.org>
 
+# Moved from further down
+RUN groupadd -g 288 kdcproxy && \
+        useradd -u 288 -g 288 -c 'IPA KDC Proxy User' \
+	    -d '/var/lib/kdcproxy' -s '/sbin/nologin' kdcproxy
+
 RUN cd /etc/yum.repos.d && curl -LO https://copr.fedorainfracloud.org/coprs/g/freeipa/freeipa-4-5/repo/fedora-26/group_freeipa-freeipa-4-5-fedora-26.repo
 RUN mkdir -p /run/lock && dnf install -y freeipa-server freeipa-server-dns freeipa-server-trust-ad initscripts && dnf clean all
 
@@ -50,7 +55,8 @@ RUN systemctl enable ipa-server-configure-first.service
 
 COPY exit-via-chroot.conf /usr/lib/systemd/system/systemd-poweroff.service.d/
 
-RUN groupadd -g 288 kdcproxy ; useradd -u 288 -g 288 -c 'IPA KDC Proxy User' -d '/var/lib/kdcproxy' -s '/sbin/nologin' kdcproxy
+# Already exists at this point; move earlier
+#RUN groupadd -g 288 kdcproxy ; useradd -u 288 -g 288 -c 'IPA KDC Proxy User' -d '/var/lib/kdcproxy' -s '/sbin/nologin' kdcproxy
 
 COPY atomic-install-help /usr/share/ipa/
 COPY volume-data-list volume-data-mv-list volume-data-autoupdate /etc/
