@@ -29,6 +29,11 @@ test ! -f /run/ipa/debug-configure-first || set -x
 HOSTNAME=$( cat /data/hostname )
 
 function update_server_ip_address () {
+    if test -f /run/ipa/disable-update-server-ip; then
+	echo "Skipping server IP address update"
+	return
+    fi
+
 	CURRENT_IP=$( dig +short -t A $HOSTNAME )
 	MY_IP=''
 	if [ -f /run/ipa/ipa-server-ip ] ; then

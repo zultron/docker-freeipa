@@ -261,6 +261,9 @@ if [ $SHOW_LOG == 1 ] ; then
 	)
 fi
 
+# Give option to skip updating IP address in ipa-server-configure-first
+test -z "$DISABLE_UPDATE_SERVER_IP" || touch /run/ipa/disable-update-server-ip
+
 if [ -n "$IPA_SERVER_IP" ] ; then
 	echo "$IPA_SERVER_IP" > /run/ipa/ipa-server-ip
 fi
