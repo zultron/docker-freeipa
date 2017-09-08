@@ -14,7 +14,9 @@ RUN mkdir -p /run/lock && dnf install -y freeipa-server freeipa-server-dns freei
 # Workaround 1364139
 RUN sed -i '/installutils.verify_fqdn(config.master_host_name, options.no_host_dns)/s/)/, local_hostname=False)/' /usr/lib/python2.7/site-packages/ipaserver/install/server/replicainstall.py && python -m compileall /usr/lib/python2.7/site-packages/ipaserver/install/server/replicainstall.py
 
-# Fixed in 4.5, maybe:  https://bugzilla.redhat.com/show_bug.cgi?id=1377973
+# Fixed in 4.5:
+# -  https://bugzilla.redhat.com/show_bug.cgi?id=1377973
+# -  https://pagure.io/freeipa/issue/4317
 # # Workaround 1377973
 # RUN sed -i 's/ips.append(ipautil.CheckedIPAddress(ha, match_local=True))/ips.append(ipautil.CheckedIPAddress(ha, match_local=False))/' /usr/lib/python2.7/site-packages/ipaserver/install/installutils.py && python -m compileall /usr/lib/python2.7/site-packages/ipaserver/install/installutils.py
 # RUN sed -i "s/(list, 'ip-local')/(list, 'ip')/" /usr/lib/python2.7/site-packages/ipaserver/install/server/common.py && python -m compileall /usr/lib/python2.7/site-packages/ipaserver/install/server/common.py
