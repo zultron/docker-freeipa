@@ -5,6 +5,11 @@ MAINTAINER Jan Pazdziora
 
 RUN groupadd -g 288 kdcproxy ; useradd -u 288 -g 288 -c 'IPA KDC Proxy User' -d '/var/lib/kdcproxy' -s '/sbin/nologin' kdcproxy
 
+RUN dnf install --nogpgcheck -y dnf-plugins-core && \
+    dnf copr enable -y @freeipa/freeipa-master-nightly && \
+    dnf copr enable -y @freeipa/freeipa-master && \
+    dnf clean all
+
 RUN mkdir -p /run/lock && dnf upgrade -y && dnf install -y freeipa-server freeipa-server-dns freeipa-server-trust-ad initscripts && dnf clean all
 
 # Workaround 1364139
