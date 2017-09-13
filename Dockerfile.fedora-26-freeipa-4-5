@@ -67,6 +67,22 @@ RUN rm -rf /var/log-removed
 RUN sed -i 's!^d /var/log.*!L /var/log - - - - /data/var/log!' /usr/lib/tmpfiles.d/var.conf
 # Workaround 1286602
 RUN mv /usr/lib/tmpfiles.d/journal-nocow.conf /usr/lib/tmpfiles.d/journal-nocow.conf.disabled
+
+
+# Workaround for breakage during CA installation
+# https://github.com/freeipa/freeipa-container/issues/157#issuecomment-327766249
+#
+# Configuring certificate server (pki-tomcatd). Estimated time: 3 minutes
+# [...]
+# [9/29]: configure certmonger for renewals
+RUN sed -i /usr/lib/python2.7/site-packages/ipaserver/install/dogtaginstance.py \
+        -e '/dbus.Array(.., dbus.Signature/ s/)$/, timeout=120)/'
+# [...]
+# [10/29]: requesting RA certificate from CA
+RUN sed -i /usr/lib/python2.7/site-packages/ipalib/install/certmonger.py \
+        -e '/external-helper., helper/ s/)$/, timeout=120)/'
+
+
 RUN rm -f /data-template/var/lib/systemd/random-seed
 RUN echo 1.1 > /etc/volume-version
 
