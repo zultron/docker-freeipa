@@ -273,6 +273,11 @@ if [ -n "$IPA_SERVER_IP" ] ; then
 	echo "$IPA_SERVER_IP" > /run/ipa/ipa-server-ip
 fi
 
+if [ -n "$DEBUG_INIT_SCRIPT" ]; then
+    echo "Executing debug init script '$DEBUG_INIT_SCRIPT'" >&2
+    bash -x $DEBUG_INIT_SCRIPT
+fi
+
 exec /usr/sbin/init --show-status=false
 
 exit 10
