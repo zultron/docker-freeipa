@@ -8,13 +8,12 @@ RUN groupadd -g 289 ipaapi; useradd -u 289 -g 289 -c 'IPA Framework User' -d / -
 
 RUN mkdir -p /run/lock \
     && cd /etc/yum.repos.d \
-    && curl -O https://copr.fedorainfracloud.org/coprs/g/freeipa/freeipa-master/repo/fedora-26/group_freeipa-freeipa-master-fedora-26.repo \
-    && curl -O https://copr.fedorainfracloud.org/coprs/g/freeipa/freeipa-master-nightly/repo/fedora-26/group_freeipa-freeipa-master-nightly-fedora-26.repo \
+    && curl -O https://copr.fedorainfracloud.org/coprs/zultron/FreeIPA/repo/fedora-27/zultron-FreeIPA-fedora-27.repo \
     && dnf install -y freeipa-server \
-    freeipa-server-dns \
-    freeipa-server-trust-ad \
-    initscripts \
-    --best --allowerasing \
+	freeipa-server-dns \
+	freeipa-server-trust-ad \
+	initscripts \
+	--best --allowerasing \
     && dnf clean all
 
 RUN mkdir -p /run/lock && dnf upgrade -y && dnf install -y freeipa-server freeipa-server-dns freeipa-server-trust-ad initscripts && dnf clean all
